@@ -2,10 +2,22 @@
 
 use db\Connect as db;
 
-include 'autoload.php';
-include 'config.php';
+// if root directory is not defined, define it now;
+
+if(!defined('ROOTDIR')) {
+  define('ROOTDIR', dirname(__FILE__) . '/');
+}
+
+// Including needed files;
+
+include ROOTDIR . 'autoload.php';
+include ROOTDIR . 'config.php';
+
+// Instantiating prepared statement;
 
 $vwuser = db::Connected()->prepare("SELECT * FROM names WHERE id = ?");
+
+// Binding values to prepared statement;
 
 $vwuser->bindParam(1, $_GET['id']);
 
