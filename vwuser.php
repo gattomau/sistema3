@@ -13,6 +13,8 @@ if(!defined('ROOTDIR')) {
 include ROOTDIR . 'autoload.php';
 include ROOTDIR . 'config.php';
 
+echo trim($_GET['monaqui'], '\/*#@$');
+
 // Instantiating prepared statement;
 
 $vwuser = db::Connected()->prepare("SELECT * FROM names WHERE id = ?");

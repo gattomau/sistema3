@@ -2,8 +2,16 @@
 
 use db\Connect as db;
 
+ob_start();
+session_start();
+
 include 'autoload.php';
 include 'config.php';
+
+if(!isset($_SESSION['user'])) {
+  http_response_code(403);
+  exit;
+}
 
 $stmt = db::Connected()->prepare('SELECT * FROM names WHERE nome = :nome');
 
