@@ -9,16 +9,16 @@ $iscritti = new sys3iscritti;
 
 $userid = $_GET['id'];
 
-$sql = sys3db::db()->prepare("UPDATE `iscritti` SET nome=:nome, cognome=:cognome, nascita=:nascita, indirizzo=:indirizzo, citta=:citta, codfiscale=:codfiscale, tipodocidentita=:tipodocidentita, numdocidentita=:numdocidentita, email=:email, cellulare=:cellulare, telefono=:telefono, annosociale=:annosociale, newsletter=:newsletter WHERE id='$userid'");
+$user = $iscritti->recuperauno($userid);
+
+$sql = sys3db::db()->prepare("UPDATE `iscritti` SET nome=:nome, cognome=:cognome, nascita=:nascita, sesso=:sesso, indirizzo=:indirizzo, citta=:citta, email=:email, cellulare=:cellulare, telefono=:telefono, annosociale=:annosociale, newsletter=:newsletter WHERE id='$userid'");
 
 $sql->bindParam(':nome', $nome);
 $sql->bindParam(':cognome', $cognome);
 $sql->bindParam(':nascita', $nascita);
+$sql->bindParam(':sesso', $sesso);
 $sql->bindParam(':indirizzo', $indirizzo);
 $sql->bindParam(':citta', $citta);
-$sql->bindParam(':codfiscale', $codfiscale);
-$sql->bindParam(':tipodocidentita', $tipodocidentita);
-$sql->bindParam(':numdocidentita', $numdocidentita);
 $sql->bindParam(':email', $email);
 $sql->bindParam(':cellulare', $cellulare);
 $sql->bindParam(':telefono', $telefono);
@@ -30,10 +30,7 @@ $cognome = (!empty($_POST['cognome'])) ? $_POST['cognome'] : NULL;
 $nascita = (!empty($_POST['nascita'])) ? $_POST['nascita'] : NULL;
 $indirizzo = (!empty($_POST['indirizzo'])) ? $_POST['indirizzo'] : NULL;
 $citta = (!empty($_POST['citta'])) ? $_POST['citta'] : NULL;
-$codfiscale = (!empty($_POST['codfiscale'])) ? $_POST['codfiscale'] : NULL;
-$tipodocidentita = (!empty($_POST['tipodocidentita'])) ? $_POST['tipodocidentita'] : NULL;
-$numdocidentita = (!empty($_POST['numdocidentita'])) ? $_POST['numdocidentita'] : NULL;
-$email = (!empty($_POST['email'])) ? $_POST['email'] : NULL;
+$sesso = (!empty($_POST['sesso'])) ? $_POST['sesso'] : NULL;
 $cellulare = (!empty($_POST['cellulare'])) ? $_POST['cellulare'] : NULL;
 $telefono = (!empty($_POST['telefono'])) ? $_POST['telefono'] : NULL;
 $annosociale = (!empty($_POST['annosociale'])) ? $_POST['annosociale'] : NULL;
@@ -64,152 +61,119 @@ if(isset($_POST['submit'])) {
 
       <div id="navbar" class="navbar-collapse collapse" style="border-bottom: 1px solid black; border-top: 1px solid black">
             <ul class="nav navbar-nav">
-              <li class="active"><a href="index.php">Home</a></li>
+              <li class="active"><a href="main.php">Home</a></li>
               <li><a href="listIscritti.php">Utenti</a></li>
-              <li><a href="listCorsi.php">Corsi</a></li>
+              <li class="dropdown">
+                <a class="dropdown-toggle" href="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Corsi <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                  <li><a href="listCorsi.php">Lista</a></li>
+                  <li><a href="addCorsi.php">Nuovo Corso</a></li>
+                  <li><a href="listCategorie.php">Categorie</a></li>
+                  <li><a href="listSottocategorie.php">Sottocategorie</a></li>
+                </ul>
+              </li>
               <li><a href="listNewsletter.php">Newsletter</a></li>
             </ul>
           </div>
 
       <h1>Modifica Iscrizione</h1>
 
-    <?php foreach($iscritti->recuperauno($userid) as $user): ?>
-
     <form id="form" class="" method="post">
 
-    <div class="form-group">
+      <div class="form-group">
 
-      <div class="row">
+        <div class="row">
 
-      <div class="col-xs-4">
+        <div class="col-xs-4">
 
-      <label for="nome">Nome:</label>
-      <input class="form-control" type="text" name="nome" placeholder="Nome" value="<?php echo $user['nome'] ?>">
+          <label for="nome">Nome:</label>
+          <input class="form-control" type="text" name="nome" placeholder="Nome" value="<?php echo (!empty($user['nome']) ? $user['nome'] : '') ?>" required>
+
+        </div>
+
+
+        <div class="col-xs-4">
+
+          <label for="cognome">Cognome:</label>
+          <input class="form-control" type="text" name="cognome" placeholder="Cognome" value="<?php echo (!empty($user['cognome']) ? $user['cognome'] : '') ?>" required>
+
+        </div>
+
+        <div class="col-xs-4">
+
+          <label for="nascita">Data di Nascita::</label>
+          <input class="form-control" type="date" name="nascita" placeholder="Data di Nascita" value="<?php echo (!empty($user['nascita']) ? $user['nascita'] : '') ?>">
+
+        </div>
+
+        </div>
+
+        <div class="row">
+
+        <div class="col-xs-4">
+
+          <label for="sesso">Sesso:</label>
+          <input class="form-control" type="text" name="sesso" placeholder="Sesso" value="<?php echo (!empty($user['sesso']) ? $user['sesso'] : '') ?>" maxlength="1">
+
+        </div>
+
+        <div class="col-xs-4">
+
+          <label for="indirizzo">Indirizzo:</label>
+          <input class="form-control" type="text" name="indirizzo" placeholder="Indirizzo" value="<?php echo (!empty($user['indirizzo']) ? $user['indirizzo'] : '') ?>">
+
+        </div>
+
+        <div class="col-xs-4">
+
+
+          <label for="citta">Citta`:</label>
+          <input class="form-control" type="text" name="citta" placeholder="Citta`" value="<?php echo (!empty($user['citta']) ? $user['citta'] : '') ?>">
+
+        </div>
+
+        </div>
+
+        <div class="row">
+
+        <div class="col-xs-4">
+
+          <label for="email">E-Mail:</label>
+          <input class="form-control" type="email" name="email" placeholder="E-Mail" value="<?php echo (!empty($user['email']) ? $user['email'] : '') ?>" required>
+
+        </div>
+
+        <div class="col-xs-4">
+
+          <label for="cellulare">Cellulare:</label>
+          <input class="form-control" type="text" name="cellulare" placeholder="Cellulare" value="<?php echo (!empty($user['cellulare']) ? $user['cellulare'] : '') ?>">
+
+        </div>
+
+        <div class="col-xs-4">
+
+          <label for="telefono">Telefono:</label>
+          <input class="form-control" type="text" name="telefono" placeholder="Telefono" value="<?php echo (!empty($user['telefono']) ? $user['telefono'] : '') ?>">
+
+        </div>
+
+        </div>
+
+
 
       </div>
-
-
-      <div class="col-xs-4">
-
-      <label for="cognome">Cognome:</label>
-      <input class="form-control" type="text" name="cognome" placeholder="Cognome" value="<?php echo $user['cognome'] ?>">
-
-      </div>
-
-      <div class="col-xs-4">
-
-      <label for="nascita">Data di Nascita::</label>
-      <input class="form-control" type="text" name="nascita" placeholder="Data di Nascita" value="<?php echo $user['nascita'] ?>">
-
-      </div>
-
-      </div>
-
-      <div class="row">
-
-      <div class="col-xs-4">
-
-      <label for="indirizzo">Indirizzo:</label>
-      <input class="form-control" type="text" name="indirizzo" placeholder="Indirizzo" value="<?php echo $user['indirizzo'] ?>">
-
-      </div>
-
-      <div class="col-xs-4">
-
-
-      <label for="citta">Citta`:</label>
-      <input class="form-control" type="text" name="citta" placeholder="Citta`" value="<?php echo $user['citta'] ?>">
-
-      </div>
-
-      <div class="col-xs-4">
-
-      <label for="codfiscale">Codice Fiscale:</label>
-      <input class="form-control" type="text" name="codfiscale" placeholder="Codice Fiscale" value="<?php echo $user['codfiscale'] ?>">
-
-      </div>
-
-      </div>
-
-      <div class="row">
-
-      <div class="col-xs-4">
-
-      <label for="tipodocidentita">Tipo Documento d'Identita`:</label>
-      <input class="form-control" type="text" name="tipodocidentita" placeholder="Tipo Documento Identita`" value="<?php echo $user['tipodocidentita'] ?>">
-
-      </div>
-
-      <div class="col-xs-4">
-
-      <label for="numdocidentita">Numero Documento d'Identita`:</label>
-      <input class="form-control" type="text" name="numdocidentita" placeholder="Numero Documento Identita`" value="<?php echo $user['numdocidentita'] ?>">
-
-      </div>
-
-      <div class="col-xs-4">
-
-      <label for="email">E-Mail:</label>
-      <input class="form-control" type="text" name="email" placeholder="E-Mail" value="<?php echo $user['email'] ?>">
-
-      </div>
-
-      </div>
-
-      <div class="row">
-
-      <div class="col-xs-4">
-
-      <label for="cellulare">Cellulare:</label>
-      <input class="form-control" type="text" name="cellulare" placeholder="Cellulare" value="<?php echo $user['cellulare'] ?>">
-
-      </div>
-
-      <div class="col-xs-4">
-
-      <label for="telefono">Telefono:</label>
-      <input class="form-control" type="text" name="telefono" placeholder="Telefono" value="<?php echo $user['telefono'] ?>">
-
-      </div>
-
-
-      <div class="col-xs-4">
-
-      <label for="annosociale">Anno Sociale:</label>
-      <input class="form-control" type="text" name="annosociale" placeholder="Anno Sociale" value="2017/2018" disabled>
-
-      </div>
-
-      </div>
-
-      <div class="row">
-      <div class="col-xs-4">
-
-      <label for="newsletter">Newsletter:</label>
-      <select class="form-control" name="newsletter">
-        <option value="<?php echo $user['newsletter'] ?>"><?php echo $user['newsletter'] ?></option>
-        <option value="1">Si</option>
-        <option value="0">No</option>
-      </select>
-
-      </div>
-    </div>
-
-
-
-    </div>
 
     <div class="row" style="display: flex">
 
     <div class="col-xs-3">
 
-      <input class="btn btn-block btn-lg btn-primary" type="submit" name="submit" value="Send">
+      <input class="btn btn-block btn-lg btn-primary" type="submit" name="submit" value="Modifica Iscritto">
 
     </div>
 
     <div class="col-xs-3">
 
-      <input class="btn btn-block btn-lg btn-warning" on-click="document.getElementById('form').reset()" type="reset" name="" value="Reset">
+      <input class="btn btn-block btn-lg btn-warning" on-click="document.getElementById('form').reset()" type="reset" name="" value="Svuota Modulo">
 
     </div>
 
@@ -222,12 +186,10 @@ if(isset($_POST['submit'])) {
 
     </form>
 
-  <?php endforeach ?>
-
     </div>
 
     <script src="assets/jquery/jquery.min.js" charset="utf-8"></script>
-    <script src="assets/bootstrap/js/bootstrap.min.js" charset="utf-8"></script>
+    <!-- <script src="assets/bootstrap/js/bootstrap.min.js" charset="utf-8"></script> -->
     <script src="assets/flatui/js/flat-ui.min.js" charset="utf-8"></script>
   </body>
 </html>

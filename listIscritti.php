@@ -5,7 +5,25 @@ use sys3classes\sys3iscritti;
 
 require 'autoload.php';
 
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 $iscritti = new sys3iscritti;
+
+if(isset($_GET['nome'])) {
+
+  $nome = $_GET['nome'];
+
+  $getIscritti = sys3db::db()->prepare("SELECT * FROM `iscritti` WHERE `nome` LIKE '%$nome%'");
+
+  $getIscritti->execute();
+
+  $resIscritti = $getIscritti->fetchAll();
+
+  var_dump($resIscritti);
+
+}
+
 
 ?>
 
@@ -27,34 +45,44 @@ $iscritti = new sys3iscritti;
 
       <div id="navbar" class="navbar-collapse collapse" style="border-bottom: 1px solid black; border-top: 1px solid black">
             <ul class="nav navbar-nav">
-              <li class="active"><a href="index.php">Home</a></li>
-              <li><a href="listIscritti.php">Utenti</a></li>
-              <li><a href="listCorsi.php">Corsi</a></li>
+              <li class="active"><a href="main.php">Home</a></li>
+              <li class="dropdown">
+                <a class="dropdown-toggle" href="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Utenti <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                  <li><a href="listIscritti.php">Lista Utenti</a></li>
+                  <li><a href="tshIscritti.php">Cestino Utenti</a></li>
+                </ul>
+              </li>
+              <li class="dropdown">
+                <a class="dropdown-toggle" href="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Corsi <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                  <li><a href="listCorsi.php">Lista</a></li>
+                  <li><a href="addCorsi.php">Nuovo Corso</a></li>
+                  <li><a href="listCategorie.php">Categorie</a></li>
+                  <li><a href="listSottocategorie.php">Sottocategorie</a></li>
+                </ul>
+              </li>
               <li><a href="listNewsletter.php">Newsletter</a></li>
             </ul>
           </div>
 
       <h1>Utenti Iscritti</h1>
 
-        <table class="table">
+        <table id="userTable" class="table">
           <tr>
-            <td><span style="font-weight: bold"></span></td>
-            <td><span style="font-weight: bold"></span></td>
-            <td><span style="font-weight: bold"></span></td>
-            <td><span style="font-weight: bold"></span></td>
-            <td><span style="font-weight: bold"></span></td>
-            <td><span style="font-weight: bold"></span></td>
-            <td><span style="font-weight: bold"></span></td>
-            <td><span style="font-weight: bold"></span></td>
-            <td><span style="font-weight: bold"><a href="addIscritti.php"><button class="btn btn-block btn-primary">Aggiungi</button></a></span></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td><span style="font-weight: bold"><input id="inputCercaNome" onkeyup="myFunction()" type="text" name="" value="" placeholder="Nome"></span></td>
+            <td><span style="font-weight: bold"><input id="inputCercaCognome" onkeyup="hisFunction()" type="text" name="" value="" placeholder="Cognome"></span></td>
           </tr>
           <tr>
             <td><span style="font-weight: bold">ID</span></td>
             <td><span style="font-weight: bold">Nome</span></td>
             <td><span style="font-weight: bold">Cognome</span></td>
             <td><span style="font-weight: bold">E-Mail</span></td>
-            <td><span style="font-weight: bold">Telefono</span></td>
-            <td><span style="font-weight: bold">Cellulare</span></td>
             <td><span style="font-weight: bold">Dettagli</span></td>
             <td><span style="font-weight: bold">Modifica</span></td>
             <td><span style="font-weight: bold">Elimina</span></td>
@@ -65,11 +93,9 @@ $iscritti = new sys3iscritti;
             <td><?php echo $sub['nome'] ?></td>
             <td><?php echo $sub['cognome'] ?></td>
             <td><?php echo '<a href="mailto:' . $sub['email'] . '">' . $sub['email'] . '</a>' ?></td>
-            <td><?php echo $sub['telefono'] ?></td>
-            <td><?php echo $sub['cellulare'] ?></td>
-            <td><?php echo '<a href="http://localhost/07-uni3-def/vwIscritti.php' . '?id=' . $sub['id'] . '"><button class="btn btn-block btn-success">Dettagli</button></a>'; ?></td>
-            <td><?php echo '<a href="http://localhost/07-uni3-def/updIscritti.php' . '?id=' . $sub['id'] . '"><button class="btn btn-block btn-warning">Modifica</button></a>'; ?></td>
-            <td><?php echo '<a href="http://localhost/07-uni3-def/delIscritti.php' . '?id=' . $sub['id'] . '"><button class="btn btn-block btn-danger">Elimina</button></a>'; ?></td>
+            <td><?php echo '<a href="vwIscritti.php' . '?id=' . $sub['id'] . '"><button class="btn btn-block btn-success">Dettagli</button></a>'; ?></td>
+            <td><?php echo '<a href="updIscritti.php' . '?id=' . $sub['id'] . '"><button class="btn btn-block btn-warning">Modifica</button></a>'; ?></td>
+            <td><?php echo '<a href="delIscritti.php' . '?id=' . $sub['id'] . '"><button class="btn btn-block btn-danger">Elimina</button></a>'; ?></td>
           </tr>
         <?php endforeach ?>
         </table>
@@ -78,7 +104,48 @@ $iscritti = new sys3iscritti;
     </div>
 
     <script src="assets/jquery/jquery.min.js" charset="utf-8"></script>
-    <script src="assets/bootstrap/js/bootstrap.min.js" charset="utf-8"></script>
+    <!-- <script src="assets/bootstrap/js/bootstrap.min.js" charset="utf-8"></script> -->
     <script src="assets/flatui/js/flat-ui.min.js" charset="utf-8"></script>
+    <script>
+    function myFunction() {
+
+      var input, filter, table, tr, td, i;
+      input = document.getElementById('inputCercaNome');
+      filter = input.value.toUpperCase();
+      table = document.getElementById('userTable');
+      tr = document.getElementsByTagName('tr');
+
+      for (i = 2; i < tr.length; i++) {
+        td = tr[i].getElementsByTagName('td')[1];
+        if (td) {
+          if(td.innerHTML.toUpperCase().indexOf(filter) > -1) {
+            tr[i].style.display = "";
+          } else {
+            tr[i].style.display = "none";
+          }
+        }
+      }
+    }
+
+    function hisFunction() {
+
+      var input, filter, table, tr, td, i;
+      input = document.getElementById('inputCercaCognome');
+      filter = input.value.toUpperCase();
+      table = document.getElementById('userTable');
+      tr = document.getElementsByTagName('tr');
+
+      for (i = 2; i < tr.length; i++) {
+        td = tr[i].getElementsByTagName('td')[2];
+        if (td) {
+          if(td.innerHTML.toUpperCase().indexOf(filter) > -1) {
+            tr[i].style.display = "";
+          } else {
+            tr[i].style.display = "none";
+          }
+        }
+      }
+    }
+    </script>
   </body>
 </html>

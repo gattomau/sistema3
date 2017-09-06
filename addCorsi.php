@@ -13,13 +13,29 @@ ini_set('display_errors', 1);
 
 $corsi->init();
 
-$sql = sys3db::db()->prepare('INSERT INTO `corsi` (titolo, categoria, sottocategoria, dataInizio, dataFine, docente, descrizione) VALUES (:titolo, :categoria, :sottocategoria, :dataInizio, :dataFine, :docente, :descrizione);');
+$getCategorie = sys3db::db()->prepare("SELECT * FROM categorie");
+
+$getCategorie->execute();
+
+$categorie = $getCategorie->fetchAll();
+
+$getSottocategorie = sys3db::db()->prepare("SELECT * FROM sottocategorie");
+
+$getSottocategorie->execute();
+
+$sottocategorie = $getSottocategorie->fetchAll();
+
+$sql = sys3db::db()->prepare('INSERT INTO `corsi` (titolo, categoria, sottocategoria, dataInizio, dataFine, orarioInizio, orarioFine, incontri, cadenza, docente, descrizione) VALUES (:titolo, :categoria, :sottocategoria, :dataInizio, :dataFine, :orarioInizio, :orarioFine, :incontri, :cadenza, :docente, :descrizione);');
 
 $sql->bindParam(':titolo', $titolo);
 $sql->bindParam(':categoria', $categoria);
 $sql->bindParam(':sottocategoria', $sottocategoria);
 $sql->bindParam(':dataInizio', $dataInizio);
 $sql->bindParam(':dataFine', $dataFine);
+$sql->bindParam(':orarioInizio', $orarioInizio);
+$sql->bindParam(':orarioFine', $orarioFine);
+$sql->bindParam(':incontri', $incontri);
+$sql->bindParam(':cadenza', $cadenza);
 $sql->bindParam(':docente', $docente);
 $sql->bindParam(':descrizione', $descrizione);
 
@@ -28,6 +44,10 @@ $categoria = (!empty($_POST['categoria'])) ? $_POST['categoria'] : 0;
 $sottocategoria = (!empty($_POST['sottocategoria'])) ? $_POST['sottocategoria'] : 0;
 $dataInizio = (!empty($_POST['dataInizio'])) ? $_POST['dataInizio'] : NULL;
 $dataFine = (!empty($_POST['dataFine'])) ? $_POST['dataFine'] : NULL;
+$orarioInizio = (!empty($_POST['orarioInizio'])) ? $_POST['orarioInizio'] : NULL;
+$orarioFine = (!empty($_POST['orarioFine'])) ? $_POST['orarioFine'] : NULL;
+$incontri = (!empty($_POST['incontri'])) ? $_POST['incontri'] : NULL;
+$cadenza = (!empty($_POST['cadenza'])) ? $_POST['cadenza'] : NULL;
 $docente = (!empty($_POST['docente'])) ? $_POST['docente'] : NULL;
 $descrizione = (!empty($_POST['descrizione'])) ? $_POST['descrizione'] : NULL;
 
@@ -67,7 +87,15 @@ if(isset($_POST['submit'])) {
             <ul class="nav navbar-nav">
               <li class="active"><a href="index.php">Home</a></li>
               <li><a href="listIscritti.php">Utenti</a></li>
-              <li><a href="listCorsi.php">Corsi</a></li>
+              <li class="dropdown">
+                <a class="dropdown-toggle" href="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Corsi <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                  <li><a href="listCorsi.php">Lista</a></li>
+                  <li><a href="addCorsi.php">Nuovo Corso</a></li>
+                  <li><a href="listCategorie.php">Categorie</a></li>
+                  <li><a href="listSottocategorie.php">Sottocategorie</a></li>
+                </ul>
+              </li>
               <li><a href="listNewsletter.php">Newsletter</a></li>
             </ul>
           </div>
@@ -87,18 +115,22 @@ if(isset($_POST['submit'])) {
 
       </div>
 
-
       <div class="col-xs-4">
 
-      <label for="cognome">Data Inizio:</label>
-      <input class="form-control" type="text" name="dataInizio" placeholder="Data Inizio" value="">
+      <label for="docente">Docente:</label>
+      <input class="form-control" type="text" name="docente" placeholder="Docente" value="">
 
       </div>
 
       <div class="col-xs-4">
 
-      <label for="nascita">Data Fine::</label>
-      <input class="form-control" type="text" name="dataFine" placeholder="Data Fine" value="">
+      <label for="categoria">Indirizzo:</label>
+      <select class="form-control" name="categoria">
+        <option value="">---</option>
+        <?php foreach($categorie as $categoria): ?>
+        <option value="<?php echo $categoria['id'] ?>"><?php echo $categoria['Titolo'] ?></option>
+        <?php endforeach ?>
+      </select>
 
       </div>
 
@@ -106,20 +138,71 @@ if(isset($_POST['submit'])) {
 
       <div class="row">
 
-      <div class="col-xs-4">
+        <div class="col-xs-4">
 
-      <label for="indirizzo">Docente:</label>
-      <input class="form-control" type="text" name="docente" placeholder="Docente" value="">
+        <label for="sottocategoria">Materia:</label>
+        <select class="form-control" name="sottocategoria">
+          <option value="">---</option>
+          <?php foreach($sottocategorie as $sottocategoria): ?>
+          <option value="<?php echo $sottocategoria['id'] ?>"><?php echo $sottocategoria['Titolo'] ?></option>
+          <?php endforeach ?>
+        </select>
+
+        </div>
+
+        <div class="col-xs-4">
+
+        <label for="dataInizio">Data Inizio:</label>
+        <input class="form-control" type="date" name="dataInizio" placeholder="Data Inizio" value="">
+
+        </div>
+
+        <div class="col-xs-4">
+
+        <label for="dataFine">Data Fine:</label>
+        <input class="form-control" type="date" name="dataFine" placeholder="Data Fine" value="">
+
+        </div>
 
       </div>
 
-      <div class="col-xs-4">
+      <div class="row">
 
+        <div class="col-xs-4">
+          <label for="orarioInizio">Orario di Inizio:</label>
+          <input class="form-control" type="text" name="orarioInizio" placeholder="Orario di Inizio" value="">
+        </div>
 
-      <label for="citta">Descrizione:</label>
-      <textarea class="form-control" rows="8" cols="80" name="descrizione" placeholder="Descrizione" value=""></textarea>
+        <div class="col-xs-4">
+          <label for="orarioFine">Orario di Fine:</label>
+          <input class="form-control" type="text" name="orarioFine" placeholder="Orario di Fine" value="">
+        </div>
+
+        <div class="col-xs-4">
+          <label for="incontri">Incontri:</label>
+          <input class="form-control" type="text" name="incontri" placeholder="Numero Incontri" value="">
+        </div>
 
       </div>
+
+      <div class="row">
+
+        <div class="col-xs-4">
+          <label for="cadenza">Cadenza:</label>
+          <input type="text" name="cadenza" value="">
+        </div>
+
+      </div>
+
+      <div class="row">
+
+        <div class="col-xs-12">
+
+
+        <label for="descrizione">Descrizione:</label>
+        <textarea class="form-control" rows="8" cols="80" name="descrizione" placeholder="Descrizione" value=""></textarea>
+
+        </div>
 
       </div>
 
@@ -152,7 +235,7 @@ if(isset($_POST['submit'])) {
     </div>
 
     <script src="assets/jquery/jquery.min.js" charset="utf-8"></script>
-    <script src="assets/bootstrap/js/bootstrap.min.js" charset="utf-8"></script>
+    <!-- <script src="assets/bootstrap/js/bootstrap.min.js" charset="utf-8"></script> -->
     <script src="assets/flatui/js/flat-ui.min.js" charset="utf-8"></script>
   </body>
 </html>

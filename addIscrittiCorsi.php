@@ -20,7 +20,7 @@ $corsi->init();
 
 $sql = sys3db::db()->prepare('INSERT INTO `iscritticorsi` (idCorso, idUtente) VALUES (:idCorso, :idUtente);');
 
-$getIscritti = sys3db::db()->prepare("SELECT `id` FROM `iscritti` WHERE `email` = '$email'");
+$getIscritti = sys3db::db()->prepare("SELECT `id` FROM `iscritti2017` WHERE `email` = '$email'");
 
 $getIscritti->execute();
 
@@ -32,14 +32,25 @@ $getCorsi->execute();
 
 $corso = $getCorsi->fetchAll();
 
+$getCategorie = sys3db::db()->prepare('SELECT * FROM categorie');
+
+$getCategorie->execute();
+
+$categorie = $getCategorie->fetchAll();
+
+$getSottocategorie = sys3db::db()->prepare('SELECT * FROM sottocategorie');
+
+$getSottocategorie->execute();
+
+$sottocategorie = $getSottocategorie->fetchAll();
+
 $sql->bindParam(':idUtente', $utente['id']);
-$sql->bindParam(':idCorso', $selcorso);
+$sql->bindParam(':idCorso', $courseid);
 
-$selcorso = (!empty($_POST['selcorso'])) ? $_POST['selcorso'] : 0;
+$courseid = (!empty($courseid)) ? $courseid : 0;
 
-print_r($corso);
-
-if(isset($_POST['submit'])) {
+if(isset($_GET['courseid'])) {
+  $courseid = $_GET['courseid'];
 
   $sql->execute();
 
@@ -48,8 +59,6 @@ if(isset($_POST['submit'])) {
       echo 'Si &egrave; verificato un errore durante l\'aggiunta del corso: ' . $sql->errorInfo()[0] . ':' . $sql->errorInfo()[1] . ' ' . $sql->errorInfo()[2];
     }
     echo 'Non &egrave; stato possibile inserire i dati nel database!';
-  } else {
-    header('location: listIscritti.php');
   }
 }
 
@@ -75,60 +84,134 @@ if(isset($_POST['submit'])) {
             <ul class="nav navbar-nav">
               <li class="active"><a href="index.php">Home</a></li>
               <li><a href="listIscritti.php">Utenti</a></li>
-              <li><a href="listCorsi.php">Corsi</a></li>
+              <li class="dropdown">
+                <a class="dropdown-toggle" href="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Corsi <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                  <li><a href="listCorsi.php">Lista</a></li>
+                  <li><a href="addCorsi.php">Nuovo Corso</a></li>
+                  <li><a href="listCategorie.php">Categorie</a></li>
+                  <li><a href="listSottocategorie.php">Sottocategorie</a></li>
+                </ul>
+              </li>
               <li><a href="listNewsletter.php">Newsletter</a></li>
             </ul>
           </div>
 
-      <h1>Aggiungi Corso</h1>
+      <h1>Iscrivi ai Corsi</h1>
 
-    <form id="form" class="" method="post">
+      <table id="corsiTable" class="table">
+        <tr>
+          <!-- <td><span style="font-weight: bold"></span></td>
+          <td><span style="font-weight: bold"></span></td> -->
+          <td><span style="font-weight: bold"><input id="cercaTitolo" onkeyup="cercaTitolo()" type="text" name="titolo" value="" placeholder="Titolo"></span></td>
+          <td><span style="font-weight: bold"><input id="cercaDocente" onkeyup="cercaDocente()" type="text" name="docente" value="" placeholder="Docente"></span></td>
+          <td colspan="2"><span style="font-weight: bold"><select id="cercaCategoria" onmouseup="cercaCategoria()">
+            <option value="Indirizzi">Indirizzi...</option>
+            <?php foreach($categorie as $categoria): ?>
+            <option value="<?php echo $categoria['Titolo'] ?>"><?php echo $categoria['Titolo'] ?></option>
+            <?php endforeach ?>
+          </select></span></td>
+          <td><span style="font-weight: bold"><select id="cercaSottocategoria" onmouseup="cercaSottocategoria()">
+            <option value="Materie">Materie...</option>
+            <?php foreach($sottocategorie as $sottocategoria): ?>
+            <option value="<?php echo $sottocategoria['Titolo'] ?>"><?php echo $sottocategoria['Titolo'] ?></option>
+            <?php endforeach ?>
+          </select></span></td>
+        </tr>
+        <tr>
+          <td><span style="font-weight: bold">Titolo</span></td>
+          <!-- <td><span style="font-weight: bold">Data Inizio</span></td>
+          <td><span style="font-weight: bold">Data Fine</span></td> -->
+          <td><span style="font-weight: bold">Docente</span></td>
+          <td><span style="font-weight: bold">Indirizzo</span></td>
+          <td><span style="font-weight: bold">Materia</span></td>
+          <td colspan="3"></td>
+        </tr>
+      <?php foreach($corsi->recupera() as $course): ?>
+        <tr>
+          <td><?php echo $course['titolo'] ?></td>
+          <td><?php echo $course['docente'] ?></td>
+          <td><?php echo $course['titoloCategoria'] ?></td>
+          <td><?php echo $course['titoloSottocategoria'] ?></td>
+          <td><?php echo '<a href="addIscrittiCorsi.php?email=' . $email . '&courseid=' . $course['id'] . '"><button class="btn btn-block btn-success">Iscrivi</button></a>'; ?></td>
+        </tr>
+      <?php endforeach ?>
+      <tr>
+        <td><span style="font-weight: bold"></span></td>
+        <td><span style="font-weight: bold"></span></td>
+        <td><span style="font-weight: bold"></span></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td><span style="font-weight: bold"></td>
+      </tr>
+      </table>
 
-    <div class="form-group">
-
-      <div class="row">
-
-      <div class="col-xs-4">
-
-      <label for="cognome">Data Inizio:</label>
-      <select class="form-control" name="selcorso">
-        <?php foreach($corso as $course): ?>
-        <option value="<?php echo $course['id'] ?>"><?php echo $course['titolo'] ?></option>
-        <?php endforeach; ?>
-      </select>
-
-      </div>
-
-      </div>
-
-    <div class="row" style="display: flex">
-
-    <div class="col-xs-3">
-
-      <input class="btn btn-block btn-lg btn-primary" type="submit" name="submit" value="Aggiungi">
-
-    </div>
-
-    <div class="col-xs-3">
-
-      <input class="btn btn-block btn-lg btn-warning" on-click="document.getElementById('form').reset()" type="reset" name="" value="Reset">
-
-    </div>
-
-    <div class="col-xs-3">
-
-      <a href="listCorsi.php">Annulla</a>
-
-    </div>
-
-  </div>
-
-    </form>
-
-    </div>
+      <span style="margin-bottom: 25px"><a href="listIscritti.php"><button class="btn btn-block btn-info">Completato</button></a></span>
 
     <script src="assets/jquery/jquery.min.js" charset="utf-8"></script>
-    <script src="assets/bootstrap/js/bootstrap.min.js" charset="utf-8"></script>
+    <!-- <script src="assets/bootstrap/js/bootstrap.min.js" charset="utf-8"></script> -->
     <script src="assets/flatui/js/flat-ui.min.js" charset="utf-8"></script>
+    <script>
+    function cercaTitolo() {
+
+      var input, filter, table, tr, td, i;
+      input = document.getElementById('cercaTitolo');
+      filter = input.value.toUpperCase();
+      table = document.getElementById('corsiTable');
+      tr = document.getElementsByTagName('tr');
+
+      for (i = 2; i < tr.length; i++) {
+        td = tr[i].getElementsByTagName('td')[1];
+        if (td) {
+          if(td.innerHTML.toUpperCase().indexOf(filter) > -1) {
+            tr[i].style.display = "";
+          } else {
+            tr[i].style.display = "none";
+          }
+        }
+      }
+    }
+
+    function cercaDocente() {
+
+      var input, filter, table, tr, td, i;
+      input = document.getElementById('cercaDocente');
+      filter = input.value.toUpperCase();
+      table = document.getElementById('corsiTable');
+      tr = document.getElementsByTagName('tr');
+
+      for (i = 2; i < tr.length; i++) {
+        td = tr[i].getElementsByTagName('td')[4];
+        if (td) {
+          if(td.innerHTML.toUpperCase().indexOf(filter) > -1) {
+            tr[i].style.display = "";
+          } else {
+            tr[i].style.display = "none";
+          }
+        }
+      }
+    }
+
+    function cercaCategoria() {
+
+      var input, filter, table, tr, td, i;
+      input = document.getElementById('cercaCategoria');
+      filter = input.value.toUpperCase();
+      table = document.getElementById('corsiTable');
+      tr = document.getElementsByTagName('tr');
+
+      for (i = 2; i < tr.length; i++) {
+        td = tr[i].getElementsByTagName('td')[5];
+        if (td) {
+          if(td.innerHTML.toUpperCase().indexOf(filter) > -1) {
+            tr[i].style.display = "";
+          } else {
+            tr[i].style.display = "none";
+          }
+        }
+      }
+    }
+    </script>
   </body>
 </html>

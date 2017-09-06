@@ -10,7 +10,7 @@ class sys3db
   private static $dbname = 'uni3';
   private static $dbhost = 'localhost';
   private static $dbuser = 'root';
-  private static $dbpass = 'maurizio';
+  private static $dbpass = 'maurizio91';
 
   private static $db;
 

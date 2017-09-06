@@ -17,7 +17,7 @@ class sys3iscritti
 
   public function recupera() {
 
-    $sql = 'SELECT id, nome, cognome, nascita, indirizzo, citta, codfiscale, tipodocidentita, numdocidentita, email, cellulare, telefono, annosociale, newsletter FROM iscritti';
+    $sql = 'SELECT id, nome, cognome, nascita, indirizzo, citta, email, cellulare, telefono, annosociale, newsletter FROM iscritti2017 WHERE removed = 0 AND confirmed = 1';
 
     $esegui = sys3db::db()->query($sql);
 
@@ -27,9 +27,11 @@ class sys3iscritti
 
   public function recuperauno($id) {
 
-    $sql = "SELECT id, nome, cognome, nascita, indirizzo, citta, codfiscale, tipodocidentita, numdocidentita, email, cellulare, telefono, annosociale, newsletter FROM iscritti WHERE id='$id'";
+    $sql = sys3db::db()->prepare("SELECT id, nome, cognome, nascita, sesso, indirizzo, citta, email, cellulare, telefono, annosociale, newsletter FROM iscritti2017 WHERE id='$id'");
 
-    $esegui = sys3db::db()->query($sql);
+    $sql->execute();
+
+    $esegui = $sql->fetch(PDO::FETCH_ASSOC);
 
     return $esegui;
   }
@@ -45,11 +47,19 @@ class sys3iscritti
   }
 
   public function cancella($id) {
-    $sql = sys3db::db()->prepare("DELETE FROM `iscritti` WHERE id = '$id'");
+    $sql = sys3db::db()->prepare("UPDATE `iscritti2017` SET removed=1 WHERE id = '$id'");
 
     if($sql->execute()) {
       return 0;
     }
+  }
+
+  public function recuperarem() {
+    $sql = "SELECT id, nome, cognome, indirizzo, citta, email, cellulare, telefono, annosociale, newsletter FROM `iscritti2017` WHERE removed = 1";
+
+    $esegui = sys3db::db()->query($sql);
+
+    return $esegui;
   }
 
   public function cancellanews($id) {

@@ -9,18 +9,18 @@ $corsi = new sys3corsi;
 
 $courseid = $_GET['id'];
 
-$getjoin = sys3db::db()->prepare('SELECT `iscritti`.`nome`, `iscritti`.`cognome`, `iscritti`.`email`
-                                   FROM `corsi`
-                                   JOIN `iscritticorsi`
-                                   ON `corsi`.`id` = `iscritticorsi`.`idCorso`
-                                   JOIN `iscritti`
-                                   ON `iscritticorsi`.`idUtente` = `iscritti`.`id`');
+$getjoin = sys3db::db()->prepare("SELECT `iscritti2017`.`nome`, `iscritti`.`cognome`, `iscritti`.`email`
+                                   FROM `iscritticorsi`
+                                   JOIN `corsi`
+                                   ON `corsi`.`id` = '$courseid'
+                                   JOIN `iscritti2017`
+                                   ON `iscritticorsi`.`idUtente` = `iscritti2017`.`id`
+                                   AND iscritticorsi.idCorso = '$courseid'
+                                   ");
 
 $getjoin->execute();
 
 $row = $getjoin->fetchAll();
-
-print_r($row);
 
 ?>
 
@@ -44,7 +44,15 @@ print_r($row);
             <ul class="nav navbar-nav">
               <li class="active"><a href="index.php">Home</a></li>
               <li><a href="listIscritti.php">Utenti</a></li>
-              <li><a href="listCorsi.php">Corsi</a></li>
+              <li class="dropdown">
+                <a class="dropdown-toggle" href="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Corsi <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                  <li><a href="listCorsi.php">Lista</a></li>
+                  <li><a href="addCorsi.php">Nuovo Corso</a></li>
+                  <li><a href="listCategorie.php">Categorie</a></li>
+                  <li><a href="listSottocategorie.php">Sottocategorie</a></li>
+                </ul>
+              </li>
               <li><a href="listNewsletter.php">Newsletter</a></li>
             </ul>
           </div>
@@ -58,6 +66,8 @@ print_r($row);
             <td><span style="font-weight: bold"></span></td>
             <td><span style="font-weight: bold"></span></td>
             <td><span style="font-weight: bold"></span></td>
+            <td><span style="font-weight: bold"></span></td>
+            <td><span style="font-weight: bold"></span></td>
             <td><span style="font-weight: bold"><a href="listCorsi.php"><button class="btn btn-block btn-primary">Indietro</button></a></span></td>
           </tr>
           <tr>
@@ -66,6 +76,8 @@ print_r($row);
           <tr>
             <td><span style="font-weight: bold">ID</span></td>
             <td><span style="font-weight: bold">Titolo</span></td>
+            <td><span style="font-weight: bold">Materia</span></td>
+            <td><span style="font-weight: bold">Indirizzo</span></td>
             <td><span style="font-weight: bold">Data Inizio</span></td>
             <td><span style="font-weight: bold">Data Fine</span></td>
             <td><span style="font-weight: bold">Docente</span></td>
@@ -75,6 +87,8 @@ print_r($row);
           <tr>
             <td><?php echo '#' . $course['id'] . '/2017' ?></td>
             <td><?php echo $course['titolo'] ?></td>
+            <td><?php echo $course['titoloCategoria'] ?></td>
+            <td><?php echo $course['titoloSottocategoria'] ?></td>
             <td><?php echo $course['dataInizio'] ?></td>
             <td><?php echo date('d M Y', strtotime($course['dataFine'])) ?></td>
             <td><?php echo $course['docente'] ?></td>
@@ -103,7 +117,7 @@ print_r($row);
     </div>
 
     <script src="assets/jquery/jquery.min.js" charset="utf-8"></script>
-    <script src="assets/bootstrap/js/bootstrap.min.js" charset="utf-8"></script>
+    <!-- <script src="assets/bootstrap/js/bootstrap.min.js" charset="utf-8"></script> -->
     <script src="assets/flatui/js/flat-ui.min.js" charset="utf-8"></script>
   </body>
 </html>
